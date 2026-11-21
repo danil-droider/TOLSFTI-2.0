@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useGoalStore } from "./store/useGoalStore.ts"
-import * as confetti from "canvas-confetti"
+import confetti from "canvas-confetti"
 import OnboardingScreen from "./components/OnboardingScreen.tsx"
 import SalaryModal from "./components/SalaryModal.tsx"
 import DashboardScreen from "./components/DashboardScreen.tsx"
@@ -30,12 +30,17 @@ function App() {
   // Fire celebration confetti once when a goal transitions to completed.
   useEffect(() => {
     if (!completedGoalId) return
-    confetti({
-      particleCount: 120,
-      spread: 70,
-      origin: { y: 0.4 },
-      colors: ["#30D158", "#FFFFFF", "#121212"],
-    })
+    // canvas-confetti exports its main function as the default export. Guard the call
+    // so environments without a usable confetti implementation (e.g. no canvas)
+    // never throw "confetti is not a function".
+    if (typeof confetti === "function") {
+      confetti({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.4 },
+        colors: ["#30D158", "#FFFFFF", "#121212"],
+      })
+    }
   }, [completedGoalId])
 
   const store = useGoalStore.getState()

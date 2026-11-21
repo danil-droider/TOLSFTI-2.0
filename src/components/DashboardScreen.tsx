@@ -48,7 +48,7 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
         <p className="text-xs text-muted">v{import.meta.env.VITE_APP_VERSION ?? "1.0"}</p>
       </div>
 
-      <div className="flex-1 flex flex-col gap-3">
+      <div className="flex-1 flex flex-col gap-3 pb-24">
         {goals.map((goal, index) => {
           const IconComponent = ICONS[index % ICONS.length]
           const statusConfig = STATUS_CONFIG[goal.status] ?? STATUS_CONFIG.idle
@@ -102,13 +102,18 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
         })}
       </div>
 
-      <button
-        type="button"
-        onClick={onCreateGoal}
-        className="fixed bottom-6 right-6 size-14 bg-emerald rounded-full flex items-center justify-center text-emerald-text font-bold shadow-lg"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
+      <div className="fixed bottom-0 inset-x-0 z-20 pb-20">
+        <div className="mx-auto w-full max-w-md px-4">
+          <button
+            type="button"
+            onClick={onCreateGoal}
+            className="w-full flex items-center justify-center gap-2 bg-emerald text-emerald-text font-bold rounded-2xl min-h-[48px] py-2"
+          >
+            <Plus className="w-5 h-5" />
+            <span className="text-center">Add New Goal</span>
+          </button>
+        </div>
+      </div>
       <CreateGoalModal
         isOpen={showCreateGoal}
         onClose={() => setShowCreateGoal(false)}
