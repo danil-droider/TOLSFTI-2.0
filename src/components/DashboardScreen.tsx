@@ -1,0 +1,122 @@
+import { useState } from "react"
+import { Camera, Laptop, Pause, Play, Plus, Target } from "lucide-react"
+import { useGoalStore } from "../store/useGoalStore.ts"
+import { formatUsd } from "../utils/formatters.ts"
+import CreateGoalModal from "./CreateGoalModal.tsx"
+
+type GoalStatus = "idle" | "active" | "paused" | "completed"
+
+const ICONS: React.ComponentType<{ className?: string }>[] = [Laptop, Camera, Target]
+
+const STATUS_CONFIG: Record<
+  GoalStatus,
+  { bar: string; text: string; ring: string; Icon: React.ComponentType<{ className?: string }> }
+> = {
+  active: { bar: "bg-emerald", text: "text-emerald", ring: "border-emerald/50", Icon: Pause },
+  paused: { bar: "bg-amber", text: "text-amber", ring: "border-amber/50", Icon: Play },
+  completed: { bar: "bg-emerald", text: "text-emerald", ring: "border-muted/30", Icon: Play },
+  idle: { bar: "bg-[#3A3A3C]", text: "text-muted", ring: "border-muted/30", Icon: Play },
+}
+
+export interface DashboardScreenProps {
+  onGoalSelect: (id: string) => void
+  onSetSalary: () => void
+  onCreateGoal: () => void
+}
+
+export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoal }: DashboardScreenProps) {
+  const store = useGoalStore.getState()
+  const monthlySalary = useGoalStore((s) => s.monthlySalary)
+  const goals = useGoalStore((s) => s.goals)
+  const tick = useGoalStore((s) => s.tick) // 1-second UI tick forces live ETA / percentage refresh
+  const [showCreateGoal, setShowCreateGoal] = useState(false)
+
+  const hourlyRate = monthlySalary / (30 * 24)
+
+  void tick
+
+  return (
+    <div className="flex flex-col min-h-screen bg-background text-text p-4">
+      <div className="flex flex-col gap-1 mb-6">
+        <h2 className="text-2xl font-bold tracking-tight text-[#FFFFFF]">Live Savings</h2>
+        <p
+          className="text-sm text-muted tabular-nums cursor-pointer hover:text-[#FFFFFF]"
+          onClick={onSetSalary}
+        >
+          Hourly Earning: {formatUsd(hourlyRate)}
+        </p>
+        <p className="text-xs text-muted">v{import.meta.env.VITE_APP_VERSION ?? "1.0"}</p>
+      </div>
+
+      <div className="flex-1 flex flex-col gap-3">
+        {goals.map((goal, index) => {
+          const IconComponent = ICONS[index % ICONS.length]
+          const statusConfig = STATUS_CONFIG[goal.status] ?? STATUS_CONFIG.idle
+          const { bar, text, ring, Icon: StatusIcon } = statusConfig
+          const pct = store.goalPct(goal.id)
+          const eta = store.goalEtaLine(goal.id)
+          const isActive = goal.status === "active"
+          return (
+            <div
+              key={goal.id}
+              onClick={() => onGoalSelect(goal.id)}
+              className="bg-surface-2 rounded-2xl border border-white/6 p-4 cursor-pointer"
+              data-tick={String(tick)}
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-surface-1 rounded p-2">
+                  <IconComponent className="w-5 h-5 text-muted" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="font-semibold text-[#FFFFFF]">{goal.title}</h3>
+                    <span className="text-muted text-sm tabular-nums">
+                      {formatUsd(goal.saved)} / {formatUsd(goal.target)}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    store.toggleSaving(goal.id)
+                  }}
+                  className={`size-11 rounded-full border ${ring} bg-surface-1 p-0 flex items-center justify-center`}
+                >
+                  <StatusIcon className={`w-5 h-5 ${text}`} />
+                </button>
+              </div>
+
+              <div className="mt-3 h-2 w-full rounded-full bg-[#3A3A3C] overflow-hidden">
+                <div className={`h-2 ${bar}`} style={{ width: `${pct}%` }} />
+              </div>
+
+              <div className="mt-2 flex justify-between items-baseline gap-2">
+                <span className={`font-semibold ${text} tabular-nums`}>
+                  {pct.toFixed(2)}%
+                </span>
+                <span className="text-muted text-sm tabular-nums">{eta}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={onCreateGoal}
+        className="fixed bottom-6 right-6 size-14 bg-emerald rounded-full flex items-center justify-center text-emerald-text font-bold shadow-lg"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
+      <CreateGoalModal
+        isOpen={showCreateGoal}
+        onClose={() => setShowCreateGoal(false)}
+        onCreate={(name, target) => {
+          store.addGoal(name, target)
+          setShowCreateGoal(false)
+        }}
+      />
+    </div>
+  )
+}
