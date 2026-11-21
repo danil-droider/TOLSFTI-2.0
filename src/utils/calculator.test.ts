@@ -194,9 +194,9 @@ describe('helpers', () => {
     expect(formatEtaLine('idle', 100000)).toBe('Paused')
   })
 
-  it('formatEtaLine returns Xd Yh Zm for active goals', () => {
-    expect(formatEtaLine('active', 86400000)).toBe('1d 0h 0m')
-    expect(formatEtaLine('active', 90061000)).toBe('1d 1h 1m')
+  it('formatEtaLine returns Xd Yh Zm Ss for active goals', () => {
+    expect(formatEtaLine('active', 86400000)).toBe('1d 0h 0m 0s')
+    expect(formatEtaLine('active', 90061000)).toBe('1d 1h 1m 1s')
     expect(formatEtaLine('active', null)).toBe('--')
   })
 })

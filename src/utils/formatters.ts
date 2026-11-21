@@ -32,13 +32,14 @@ export function formatPct(value: number): string {
   return `${Math.min(100, Math.max(0, value)).toFixed(2)}%`
 }
 
-/** Format remaining milliseconds as Xd Yh Zm (all components shown, stable width). */
+/** Format remaining milliseconds as Xd Yh Zm Ss (all components shown, stable width). */
 export function formatEta(ms: number): string {
   const totalSeconds = Math.round(Math.max(0, ms) / 1000)
   const days = Math.floor(totalSeconds / 86400)
   const hours = Math.floor((totalSeconds % 86400) / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
-  return `${days}d ${hours}h ${minutes}m`
+  const seconds = totalSeconds % 60
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`
 }
 
 /**

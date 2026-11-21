@@ -1,8 +1,9 @@
 import { useState } from "react"
-import { Camera, Laptop, Pause, Play, Plus, Target } from "lucide-react"
+import { Camera, Settings, Laptop, Pause, Play, Plus, Target } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
 import { formatUsd } from "../utils/formatters.ts"
 import CreateGoalModal from "./CreateGoalModal.tsx"
+import SalaryModal from "./SalaryModal.tsx"
 
 type GoalStatus = "idle" | "active" | "paused" | "completed"
 
@@ -30,6 +31,7 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
   const goals = useGoalStore((s) => s.goals)
   const tick = useGoalStore((s) => s.tick) // 1-second UI tick forces live ETA / percentage refresh
   const [showCreateGoal, setShowCreateGoal] = useState(false)
+  const [showSalaryModal, setShowSalaryModal] = useState(false)
 
   const hourlyRate = monthlySalary / (30 * 24)
 
@@ -37,18 +39,33 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-text p-4">
-      <div className="flex flex-col gap-1 mb-6">
-        <h2 className="text-2xl font-bold tracking-tight text-[#FFFFFF]">Live Savings</h2>
-        <p
-          className="text-sm text-muted tabular-nums cursor-pointer hover:text-[#FFFFFF]"
-          onClick={onSetSalary}
-        >
-          Hourly Earning: {formatUsd(hourlyRate)}
-        </p>
-        <p className="text-xs text-muted">v{import.meta.env.VITE_APP_VERSION ?? "1.0"}</p>
+      <div className="flex w-full items-start justify-between">
+        {/* Left column: Live Savings and Hourly Earning */}
+        <div className="flex flex-col items-start gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-[#FFFFFF] whitespace-nowrap">Live Savings</h2>
+          <p
+            className="text-sm text-muted tabular-nums cursor-pointer hover:text-[#FFFFFF]"
+            onClick={onSetSalary}
+          >
+            Hourly Earning: {formatUsd(hourlyRate)}
+          </p>
+        </div>
+
+        {/* Right column: gear button and version */}
+        <div className="flex flex-col items-end gap-2">
+          <button
+            type="button"
+            aria-label="Settings"
+            className="h-11 w-11 rounded-full bg-[#1C1C1E]/80 border border-white/6 flex items-center justify-center hover:bg-[#242426] transition-colors"
+            onClick={() => setShowSalaryModal(true)}
+          >
+            <Settings className="w-5 h-5 text-[#8E8E93]" />
+          </button>
+          <p className="text-xs text-muted">v{import.meta.env.VITE_APP_VERSION ?? "1.0"}</p>
+        </div>
       </div>
 
-      <div className="flex-1 flex flex-col gap-3 pb-24">
+      <div className="flex-1 flex flex-col gap-3 pb-28">
         {goals.map((goal, index) => {
           const IconComponent = ICONS[index % ICONS.length]
           const statusConfig = STATUS_CONFIG[goal.status] ?? STATUS_CONFIG.idle
@@ -102,7 +119,7 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
         })}
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 z-20 pb-20">
+      <div className="fixed bottom-[calc(28px+env(safe-area-inset-bottom))] inset-x-0 z-20">
         <div className="mx-auto w-full max-w-md px-4">
           <button
             type="button"
@@ -122,6 +139,8 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
           setShowCreateGoal(false)
         }}
       />
+
+      <SalaryModal isOpen={showSalaryModal} onClose={() => setShowSalaryModal(false)} />
     </div>
   )
 }
