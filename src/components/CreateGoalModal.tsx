@@ -5,9 +5,10 @@ import { useGoalStore } from "../store/useGoalStore.ts"
 type CreateGoalModalProps = {
   isOpen: boolean
   onClose: () => void
+  onCreate: (name: string, target: number) => void
 }
 
-export default function CreateGoalModal({ isOpen, onClose }: CreateGoalModalProps) {
+export default function CreateGoalModal({ isOpen, onClose, onCreate }: CreateGoalModalProps) {
   const [name, setName] = useState("")
   const [targetAmount, setTargetAmount] = useState("")
   const store = useGoalStore.getState()
@@ -19,6 +20,7 @@ export default function CreateGoalModal({ isOpen, onClose }: CreateGoalModalProp
   const handleCreate = () => {
     if (isValid) {
       store.addGoal(name.trim(), parsed)
+      onCreate(name.trim(), parsed)
       onClose()
     }
   }

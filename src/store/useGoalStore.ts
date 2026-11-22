@@ -162,7 +162,7 @@ export const useGoalStore = create<GoalStoreState>()(
         setSalary: (amount: number): void => {
           const now = Date.now()
           const s = settle(now)
-          const update = { goals: s.goals, lastUpdatedTimestamp: now, monthlySalary: amount }
+          const update: Partial<GoalStoreState> & { completedGoalId?: string | null } = { goals: s.goals, lastUpdatedTimestamp: now, monthlySalary: amount }
           if (s.newlyCompleted) update.completedGoalId = s.newlyCompleted
           set(update)
         },
@@ -181,7 +181,7 @@ export const useGoalStore = create<GoalStoreState>()(
             createdAt: now,
           }
           const nextGoals = [...s.goals, newGoal]
-          const update = { goals: nextGoals, lastUpdatedTimestamp: now, monthlySalary }
+          const update: Partial<GoalStoreState> & { completedGoalId?: string | null } = { goals: nextGoals, lastUpdatedTimestamp: now, monthlySalary }
           if (s.newlyCompleted) update.completedGoalId = s.newlyCompleted
           set(update)
         },
@@ -190,7 +190,7 @@ export const useGoalStore = create<GoalStoreState>()(
           const now = Date.now()
           const s = settle(now)
           const nextGoals = s.goals.filter((g) => g.id !== id)
-          const update = { goals: nextGoals, lastUpdatedTimestamp: now }
+          const update: Partial<GoalStoreState> & { completedGoalId?: string | null } = { goals: nextGoals, lastUpdatedTimestamp: now }
           if (s.newlyCompleted) update.completedGoalId = s.newlyCompleted
           set(update)
         },
@@ -198,8 +198,7 @@ export const useGoalStore = create<GoalStoreState>()(
         startGoal: (id: string): void => {
           const now = Date.now()
           const s = settle(now)
-          const update = {
-            ...s,
+          const update: Partial<GoalStoreState> & { completedGoalId?: string | null } = {
             goals: s.goals.map((g) =>
               g.id === id && (g.status === "idle" || g.status === "paused")
                 ? { ...g, status: "active", lastUpdated: now }
@@ -214,8 +213,7 @@ export const useGoalStore = create<GoalStoreState>()(
         pauseGoal: (id: string): void => {
           const now = Date.now()
           const s = settle(now)
-          const update = {
-            ...s,
+          const update: Partial<GoalStoreState> & { completedGoalId?: string | null } = {
             goals: s.goals.map((g) =>
               g.id === id && g.status === "active" ? { ...g, status: "paused", lastUpdated: now } : g
             ),
@@ -256,13 +254,6 @@ export const useGoalStore = create<GoalStoreState>()(
     {
       name: "goal-ticker-storage",
       storage: createJSONStorage(() => globalThis.localStorage),
-      deserialize: (input: string) => {
-        try {
-          return JSON.parse(input)
-        } catch {
-          return undefined
-        }
-      },
       partialize: (state) => ({
         monthlySalary: state.monthlySalary,
         goals: state.goals,

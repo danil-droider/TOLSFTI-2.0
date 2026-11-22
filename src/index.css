@@ -18,6 +18,31 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Fade-down / roll-in transition for ETA / percentage value changes */
+@keyframes fadeDownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect the user's prefers-reduced-motion setting */
+@media (prefers-reduced-motion: reduce) {
+  .fade-down-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+.fade-down-in {
+  animation: fadeDownIn 200ms ease-out forwards;
+}
+
 html,
 body,
 #root {

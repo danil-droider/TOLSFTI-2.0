@@ -4,9 +4,10 @@ import { useGoalStore } from "../store/useGoalStore.ts"
 type SalaryModalProps = {
   isOpen: boolean
   onClose: () => void
+  onSave: (amount: number) => void
 }
 
-export default function SalaryModal({ isOpen, onClose }: SalaryModalProps) {
+export default function SalaryModal({ isOpen, onClose, onSave }: SalaryModalProps) {
   const [value, setValue] = useState("")
   const store = useGoalStore.getState()
 
@@ -17,6 +18,7 @@ export default function SalaryModal({ isOpen, onClose }: SalaryModalProps) {
   const handleSave = () => {
     if (isValid) {
       store.setSalary(parsed)
+      onSave(parsed)
       onClose()
     }
   }

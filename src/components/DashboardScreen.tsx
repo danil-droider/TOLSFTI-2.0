@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Camera, Settings, Laptop, Pause, Play, Plus, Target } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
 import { formatUsd } from "../utils/formatters.ts"
@@ -32,6 +32,19 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
   const tick = useGoalStore((s) => s.tick) // 1-second UI tick forces live ETA / percentage refresh
   const [showCreateGoal, setShowCreateGoal] = useState(false)
   const [showSalaryModal, setShowSalaryModal] = useState(false)
+
+  // Ref tracking last-rendered ETA/percentage strings to trigger animation ONLY on change
+  const prevPctRef = useRef<string>('')
+  const prevEtaRef = useRef<string>('')
+
+  useEffect(() => {
+    const state = useGoalStore.getState()
+    if (goals.length > 0) {
+      const lastGoal = goals[goals.length - 1]
+      prevPctRef.current = state.goalPct(lastGoal.id).toFixed(2)
+      prevEtaRef.current = state.goalEtaLine(lastGoal.id)
+    }
+  }, [goals, tick])
 
   const hourlyRate = monthlySalary / (30 * 24)
 
@@ -72,7 +85,6 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
           const { bar, text, ring, Icon: StatusIcon } = statusConfig
           const pct = store.goalPct(goal.id)
           const eta = store.goalEtaLine(goal.id)
-          const isActive = goal.status === "active"
           return (
             <div
               key={goal.id}
@@ -108,8 +120,11 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
                 <div className={`h-2 ${bar}`} style={{ width: `${pct}%` }} />
               </div>
 
-              <div className="mt-2 flex justify-between items-baseline gap-2">
-                <span className={`font-semibold ${text} tabular-nums`}>
+              <div className={`mt-2 flex justify-between items-baseline gap-2`}>
+                <span className={`
+                  font-semibold ${text} tabular-nums
+                  ${pct.toFixed(2) !== prevPctRef.current ? 'fade-down-in' : ''}
+                `}>
                   {pct.toFixed(2)}%
                 </span>
                 <span className="text-muted text-sm tabular-nums">{eta}</span>
@@ -140,7 +155,7 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
         }}
       />
 
-      <SalaryModal isOpen={showSalaryModal} onClose={() => setShowSalaryModal(false)} />
+      <SalaryModal isOpen={showSalaryModal} onClose={() => setShowSalaryModal(false)} onSave={(amount) => { store.setSalary(amount); setShowSalaryModal(false); }} />
     </div>
   )
 }
