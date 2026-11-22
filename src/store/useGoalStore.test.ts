@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, afterEach, vi } from "vitest"
+﻿import { describe, expect, it, beforeEach, afterEach, vi } from "vitest"
 import { useGoalStore } from "./useGoalStore.ts"
 
 const monthlySalary = 3000
@@ -132,6 +132,32 @@ describe("useGoalStore persistence & settlement", () => {
     vi.setSystemTime(now + msPer30Days)
     store().settleNow()
     expect(store().getGoal(id)?.saved).toBeCloseTo(monthlySalary, 0)
+  })
+  it("addGoal adds exactly one goal per submission", () => {
+    store().setSalary(monthlySalary)
+    const beforeCount = store().goals.length
+    store().addGoal("Vacation Fund", 5000)
+    const goals = store().goals
+    expect(goals.length).toBe(beforeCount + 1)
+    const created = goals.find((g) => g.title === "Vacation Fund")
+    expect(created).toBeDefined()
+    expect(created?.target).toBe(5000)
+    expect(created?.saved).toBe(0)
+    expect(created?.status).toBe("idle")
+    expect(created?.id).toMatch(/^[0-9a-f-]{36}$/)
+    expect(goals.filter((g) => g.title === "Vacation Fund")).toHaveLength(1)
+  })
+
+  it("addGoal creates distinct ids across submissions (one card per submission)", () => {
+    store().setSalary(monthlySalary)
+    store().addGoal("Goal A", 1000)
+    store().addGoal("Goal B", 2000)
+    const goals = store().goals
+    expect(goals.length).toBe(2)
+    const ids = goals.map((g) => g.id)
+    expect(ids.filter((id, i) => ids.indexOf(id) === i).length).toBe(2)
+    expect(goals.find((g) => g.title === "Goal A")?.status).toBe("idle")
+    expect(goals.find((g) => g.title === "Goal B")?.status).toBe("idle")
   })
 })
 

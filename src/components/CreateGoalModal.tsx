@@ -1,6 +1,5 @@
-import { useState } from "react"
+﻿import { useState } from "react"
 import { X } from "lucide-react"
-import { useGoalStore } from "../store/useGoalStore.ts"
 
 type CreateGoalModalProps = {
   isOpen: boolean
@@ -11,7 +10,6 @@ type CreateGoalModalProps = {
 export default function CreateGoalModal({ isOpen, onClose, onCreate }: CreateGoalModalProps) {
   const [name, setName] = useState("")
   const [targetAmount, setTargetAmount] = useState("")
-  const store = useGoalStore.getState()
 
   const stripped = targetAmount.replace(/[^0-9.]/g, "")
   const parsed = Number(stripped)
@@ -19,7 +17,6 @@ export default function CreateGoalModal({ isOpen, onClose, onCreate }: CreateGoa
 
   const handleCreate = () => {
     if (isValid) {
-      store.addGoal(name.trim(), parsed)
       onCreate(name.trim(), parsed)
       onClose()
     }
