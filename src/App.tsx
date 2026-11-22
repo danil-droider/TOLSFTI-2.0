@@ -8,7 +8,7 @@ import GoalDetailScreen from "./components/GoalDetailScreen.tsx"
 import GoalAchievedModal from "./components/GoalAchievedModal.tsx"
 import CreateGoalModal from "./components/CreateGoalModal.tsx"
 
-export const APP_VERSION = "1.0"
+export const APP_VERSION = "1.3.0"
 
 function App() {
   const [showSalaryModal, setShowSalaryModal] = useState(false)
@@ -88,8 +88,8 @@ function App() {
       <CreateGoalModal
         isOpen={showCreateGoal}
         onClose={() => setShowCreateGoal(false)}
-        onCreate={(name, target) => {
-          store.addGoal(name, target)
+        onCreate={(name, target, badge) => {
+          store.addGoal(name, target, badge)
           setShowCreateGoal(false)
         }}
       />

@@ -228,3 +228,28 @@ describe("status normalization (defensive render guard)", () => {
   })
 })
 
+describe("goal badges (preset / emoji / photo)", () => {
+  it("addGoal stores the selected badge and defaults to the preset Laptop icon", () => {
+    store().setSalary(monthlySalary)
+    const photoBadge = { kind: "photo" as const, value: "data:image/jpeg;base64,abc" }
+    store().addGoal("Photo Goal", 1000, photoBadge)
+    expect(store().goals[0]?.badge).toEqual(photoBadge)
+
+    store().addGoal("No Badge Goal", 1000)
+    expect(store().goals[1]?.badge).toEqual({ kind: "icon", value: "Laptop" })
+  })
+
+  it("badge round-trips through persisted localStorage", () => {
+    store().setSalary(monthlySalary)
+    const emojiBadge = { kind: "emoji" as const, value: "💻" }
+    store().addGoal("Emoji Goal", 5000, emojiBadge)
+    const raw = localStorage.getItem("goal-ticker-storage")
+    expect(raw).not.toBeNull()
+    const parsed = JSON.parse(raw ?? "{}")
+    // zustand persist may store the state directly or wrapped under `state`.
+    const goals = parsed.goals ?? parsed.state?.goals ?? []
+    expect(goals.length).toBeGreaterThan(0)
+    expect(goals[0].badge).toEqual(emojiBadge)
+  })
+})
+

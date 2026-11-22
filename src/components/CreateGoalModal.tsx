@@ -1,15 +1,18 @@
 ﻿import { useState } from "react"
 import { X } from "lucide-react"
+import GoalBadgePicker from "./GoalBadgePicker.tsx"
+import type { BadgeValue } from "./GoalBadge.tsx"
 
 type CreateGoalModalProps = {
   isOpen: boolean
   onClose: () => void
-  onCreate: (name: string, target: number) => void
+  onCreate: (name: string, target: number, badge?: BadgeValue) => void
 }
 
 export default function CreateGoalModal({ isOpen, onClose, onCreate }: CreateGoalModalProps) {
   const [name, setName] = useState("")
   const [targetAmount, setTargetAmount] = useState("")
+  const [badge, setBadge] = useState<BadgeValue>({ kind: "icon", value: "Laptop" })
 
   const stripped = targetAmount.replace(/[^0-9.]/g, "")
   const parsed = Number(stripped)
@@ -17,7 +20,7 @@ export default function CreateGoalModal({ isOpen, onClose, onCreate }: CreateGoa
 
   const handleCreate = () => {
     if (isValid) {
-      onCreate(name.trim(), parsed)
+      onCreate(name.trim(), parsed, badge)
       onClose()
     }
   }
@@ -76,6 +79,11 @@ export default function CreateGoalModal({ isOpen, onClose, onCreate }: CreateGoa
               className="bg-surface-1 rounded-xl pl-11 pr-4 min-h-[44px] py-2 text-text tabular-nums w-full font-sans outline-none focus:ring-2 focus:ring-emerald/50"
             />
           </div>
+        </div>
+
+        <div className="mb-8">
+          <label className="block text-sm font-semibold text-muted mb-2">Goal Badge</label>
+          <GoalBadgePicker badge={badge} onChange={setBadge} />
         </div>
 
         <button

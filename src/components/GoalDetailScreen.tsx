@@ -2,6 +2,7 @@ import { ChevronLeft, Pause, Play } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
 import { formatDate, formatUsd, formatPct } from "../utils/formatters.ts"
 
+import GoalBadge from "./GoalBadge.tsx"
 export type GoalStatus = "idle" | "active" | "paused" | "completed"
 
 interface GoalDetailScreenProps {
@@ -102,7 +103,10 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
       <main className="flex-1 overflow-y-auto">
         <section className="bg-surface-2 rounded-2xl border border-white/6 p-6">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-bold text-[#FFFFFF]">{goal.title}</h3>
+            <div className="flex items-center gap-3 min-w-0">
+              <GoalBadge badge={goal.badge} />
+              <h3 className="font-bold text-[#FFFFFF] truncate min-w-0">{goal.title}</h3>
+            </div>
             <span
               className={`flex-1 ${badgeBg} ${badgeBorder} rounded-full px-3 py-1 text-[10px] font-bold uppercase ${badgeText} text-center`}
             >

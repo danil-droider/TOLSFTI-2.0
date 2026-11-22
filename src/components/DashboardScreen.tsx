@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from "react"
-import { Camera, Settings, Laptop, Pause, Play, Plus, Target } from "lucide-react"
+import { Settings, Pause, Play, Plus } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
 import { formatUsd } from "../utils/formatters.ts"
 import CreateGoalModal from "./CreateGoalModal.tsx"
 import SalaryModal from "./SalaryModal.tsx"
+import GoalBadge from "./GoalBadge.tsx"
+import type { BadgeValue } from "./GoalBadge.tsx"
 
 type GoalStatus = "idle" | "active" | "paused" | "completed"
 
-const ICONS: React.ComponentType<{ className?: string }>[] = [Laptop, Camera, Target]
+const ICON_NAMES: string[] = ["Laptop", "Camera", "Target"]
 
 const STATUS_CONFIG: Record<
   GoalStatus,
@@ -80,11 +82,17 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
 
       <div className="flex-1 flex flex-col gap-3 pb-28">
         {goals.map((goal, index) => {
-          const IconComponent = ICONS[index % ICONS.length]
           const statusConfig = STATUS_CONFIG[goal.status] ?? STATUS_CONFIG.idle
           const { bar, text, ring, Icon: StatusIcon } = statusConfig
           const pct = store.goalPct(goal.id)
           const eta = store.goalEtaLine(goal.id)
+          // Legacy goals saved before badges were introduced keep the original
+          // index-cycled preset icon; new goals use their stored badge.
+          const fallbackBadge: BadgeValue = {
+            kind: "icon",
+            value: ICON_NAMES[index % ICON_NAMES.length],
+          }
+          const goalBadge: BadgeValue = goal.badge ?? fallbackBadge
           return (
             <div
               key={goal.id}
@@ -93,9 +101,7 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
               data-tick={String(tick)}
             >
               <div className="flex items-center gap-3">
-                <div className="bg-surface-1 rounded p-2">
-                  <IconComponent className="w-5 h-5 text-muted" />
-                </div>
+                <GoalBadge badge={goalBadge} />
                 <div className="flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <h3 className="font-semibold text-[#FFFFFF]">{goal.title}</h3>

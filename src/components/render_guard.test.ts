@@ -65,3 +65,64 @@ describe("render guard (corrupted status)", () => {
     ).not.toThrow()
   })
 })
+
+describe("render guard (goal badges)", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  const badgeGoal = (badge: { kind: "icon" | "emoji" | "photo"; value: string }) =>
+    baseGoal({ title: "Badge Goal", badge })
+
+  it("renders DashboardScreen with a preset icon badge without throwing", () => {
+    setStore([badgeGoal({ kind: "icon", value: "Laptop" })])
+    expect(() =>
+      renderToString(
+        React.createElement(DashboardScreen, {
+          onGoalSelect: () => {},
+          onSetSalary: () => {},
+          onCreateGoal: () => {},
+        })
+      )
+    ).not.toThrow()
+  })
+
+  it("renders DashboardScreen with an emoji badge without throwing", () => {
+    setStore([badgeGoal({ kind: "emoji", value: "💻" })])
+    expect(() =>
+      renderToString(
+        React.createElement(DashboardScreen, {
+          onGoalSelect: () => {},
+          onSetSalary: () => {},
+          onCreateGoal: () => {},
+        })
+      )
+    ).not.toThrow()
+  })
+
+  it("renders DashboardScreen with a photo badge without throwing", () => {
+    setStore([badgeGoal({ kind: "photo", value: "data:image/jpeg;base64,abc" })])
+    expect(() =>
+      renderToString(
+        React.createElement(DashboardScreen, {
+          onGoalSelect: () => {},
+          onSetSalary: () => {},
+          onCreateGoal: () => {},
+        })
+      )
+    ).not.toThrow()
+  })
+
+  it("renders DashboardScreen with a legacy goal missing the badge field without throwing", () => {
+    setStore([{ ...baseGoal({}), badge: undefined } as any])
+    expect(() =>
+      renderToString(
+        React.createElement(DashboardScreen, {
+          onGoalSelect: () => {},
+          onSetSalary: () => {},
+          onCreateGoal: () => {},
+        })
+      )
+    ).not.toThrow()
+  })
+})

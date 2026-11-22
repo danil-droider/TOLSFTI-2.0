@@ -12,6 +12,15 @@ import { formatEtaLine } from "../utils/formatters.ts"
 
 export const MS_PER_DAY = 24 * 60 * 60 * 1000
 
+export type BadgeKind = 'icon' | 'emoji' | 'photo'
+
+export interface GoalBadge {
+  kind: BadgeKind
+  value: string
+}
+
+export const DEFAULT_BADGE: GoalBadge = { kind: 'icon', value: 'Laptop' }
+
 export interface Goal {
   id: string
   title: string
@@ -20,6 +29,7 @@ export interface Goal {
   status: GoalStatus
   lastUpdated: number
   createdAt: number
+  badge?: GoalBadge
 }
 
 interface GoalStoreState {
@@ -167,7 +177,7 @@ export const useGoalStore = create<GoalStoreState>()(
           set(update)
         },
 
-        addGoal: (title: string, target: number): void => {
+        addGoal: (title: string, target: number, badge?: GoalBadge): void => {
           const now = Date.now()
           const { monthlySalary } = get()
           const s = settle(now)
@@ -179,6 +189,7 @@ export const useGoalStore = create<GoalStoreState>()(
             status: "idle",
             lastUpdated: now,
             createdAt: now,
+            badge: badge ?? DEFAULT_BADGE,
           }
           const nextGoals = [...s.goals, newGoal]
           const update: Partial<GoalStoreState> & { completedGoalId?: string | null } = { goals: nextGoals, lastUpdatedTimestamp: now, monthlySalary }
