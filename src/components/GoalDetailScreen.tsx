@@ -1,6 +1,6 @@
 import { ChevronLeft, Pause, Play } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
-import { formatDate, formatUsd, formatPct } from "../utils/formatters.ts"
+import { formatDate, formatFinishDate, formatUsd, formatPct } from "../utils/formatters.ts"
 
 import GoalBadge from "./GoalBadge.tsx"
 export type GoalStatus = "idle" | "active" | "paused" | "completed"
@@ -30,7 +30,6 @@ const BAR_COLOR: Record<GoalStatus, string> = {
 export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenProps) {
   const store = useGoalStore.getState()
   const goal = useGoalStore((s) => s.getGoal(goalId))
-  const dailyRate = useGoalStore((s) => s.goalDailyRate(goalId))
   const tick = useGoalStore((s) => s.tick) // 1-second UI tick forces live percentage / ETA refresh
 
   if (!goal) return null
@@ -45,6 +44,12 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
   const barColor = BAR_COLOR[goal.status] ?? BAR_COLOR.idle
   const pct = store.goalPct(goal.id)
   const eta = store.goalEtaLine(goal.id)
+  const finishMs = store.goalEtaMs(goal.id)
+  const finishLabel = isCompleted
+    ? "Completed"
+    : finishMs === null
+    ? "Paused"
+    : formatFinishDate(Date.now() + finishMs)
   const pctColor = isActive || isCompleted ? "text-emerald" : isPaused ? "text-amber" : "text-muted"
 
   void tick
@@ -146,12 +151,12 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
         <section className="bg-surface-2 rounded-2xl border border-white/6 p-6">
           <div className="space-y-3">
             <div className="flex justify-between items-baseline gap-2">
-              <span className="text-sm text-muted">Daily Rate:</span>
-              <span className="font-bold text-[#FFFFFF] tabular-nums">{formatUsd(dailyRate)}</span>
-            </div>
-            <div className="flex justify-between items-baseline gap-2">
               <span className="text-sm text-muted">Started:</span>
               <span className="font-bold text-[#FFFFFF]">{formatDate(goal.createdAt)}</span>
+            </div>
+            <div className="flex justify-between items-baseline gap-2">
+              <span className="text-sm text-muted">Expected Finish:</span>
+              <span className="font-bold text-[#FFFFFF] tabular-nums">{finishLabel}</span>
             </div>
             <div className="flex justify-between items-baseline gap-2 border-t border-white/6 pt-3">
               <span className="text-sm text-muted">Target:</span>

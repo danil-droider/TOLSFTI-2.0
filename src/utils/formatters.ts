@@ -61,3 +61,16 @@ export function formatDate(ts: number): string {
     year: 'numeric',
   })
 }
+
+/** Format a finish timestamp as "MMM D, YYYY, HH:mm" (e.g. "Sep 12, 2025, 15:30"). */
+export function formatFinishDate(ts: number): string {
+  if (!Number.isFinite(ts)) return '--'
+  return new Date(ts).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}
