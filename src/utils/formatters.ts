@@ -26,10 +26,10 @@ export function formatUsd(
   })}`
 }
 
-/** Format a progress percentage clamped to [0, 100] with exactly 2 decimals. */
+/** Format a progress percentage clamped to [0, 100] with exactly 4 decimals. */
 export function formatPct(value: number): string {
   if (!Number.isFinite(value)) value = 0
-  return `${Math.min(100, Math.max(0, value)).toFixed(2)}%`
+  return `${Math.min(100, Math.max(0, value)).toFixed(4)}%`
 }
 
 /** Format remaining milliseconds as Xd Yh Zm Ss (all components shown, stable width). */

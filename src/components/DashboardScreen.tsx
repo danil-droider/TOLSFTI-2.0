@@ -43,7 +43,7 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
     const state = useGoalStore.getState()
     if (goals.length > 0) {
       const lastGoal = goals[goals.length - 1]
-      prevPctRef.current = state.goalPct(lastGoal.id).toFixed(2)
+      prevPctRef.current = state.goalPct(lastGoal.id).toFixed(4)
       prevEtaRef.current = state.goalEtaLine(lastGoal.id)
     }
   }, [goals, tick])
@@ -129,9 +129,9 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
               <div className={`mt-2 flex justify-between items-baseline gap-2`}>
                 <span className={`
                   font-semibold ${text} tabular-nums
-                  ${pct.toFixed(2) !== prevPctRef.current ? 'fade-down-in' : ''}
+                  ${pct.toFixed(4) !== prevPctRef.current ? 'fade-down-in' : ''}
                 `}>
-                  {pct.toFixed(2)}%
+                  {pct.toFixed(4)}%
                 </span>
                 <span className="text-muted text-sm tabular-nums">{eta}</span>
               </div>

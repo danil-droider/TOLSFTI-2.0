@@ -179,13 +179,13 @@ describe('helpers', () => {
     expect(formatUsd(-100.5)).toBe('-$100.50')
   })
 
-  it('formatPct clamps and uses 2 decimals', () => {
-    expect(formatPct(42.854)).toBe('42.85%')
-    expect(formatPct(0)).toBe('0.00%')
-    expect(formatPct(100)).toBe('100.00%')
-    expect(formatPct(-5)).toBe('0.00%')
-    expect(formatPct(150)).toBe('100.00%')
-    expect(formatPct(NaN)).toBe('0.00%')
+  it('formatPct clamps and uses 4 decimals', () => {
+    expect(formatPct(42.854)).toBe('42.8540%')
+    expect(formatPct(0)).toBe('0.0000%')
+    expect(formatPct(100)).toBe('100.0000%')
+    expect(formatPct(-5)).toBe('0.0000%')
+    expect(formatPct(150)).toBe('100.0000%')
+    expect(formatPct(NaN)).toBe('0.0000%')
   })
 
   it('formatEtaLine returns status strings for non-active goals', () => {
