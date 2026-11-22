@@ -43,8 +43,6 @@ export function compressImageToDataUrl(
       img.onload = () => {
         try {
           const canvas = document.createElement('canvas')
-          const width = Math.min(img.width, maxWidth)
-          const height = Math.min(img.height, maxHeight)
           // Preserve aspect ratio by scaling down to fit within maxWidth x maxHeight.
           const scale = Math.min(maxWidth / img.width, maxHeight / img.height)
           canvas.width = Math.max(1, Math.floor(img.width * scale))

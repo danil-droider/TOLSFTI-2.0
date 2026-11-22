@@ -40,7 +40,7 @@ interface GoalStoreState {
   completedGoalId: string | null
   settleNow: () => string | null
   setSalary: (amount: number) => void
-  addGoal: (title: string, target: number) => void
+  addGoal: (title: string, target: number, badge?: GoalBadge) => void
   deleteGoal: (id: string) => void
   startGoal: (id: string) => void
   pauseGoal: (id: string) => void
