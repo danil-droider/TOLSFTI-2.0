@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react"
+import { useRef } from "react"
 import { ChevronLeft, Pause, Play } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
 import { formatDate, formatFinishDate, formatUsd, formatPct } from "../utils/formatters.ts"
