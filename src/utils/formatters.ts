@@ -52,25 +52,25 @@ export function formatEtaLine(status: GoalStatus, remainingMs: number | null): s
   if (remainingMs === null || !Number.isFinite(remainingMs) || remainingMs <= 0) return '--'
   return formatEta(remainingMs)
 }
-/** Format a Unix-ish millisecond timestamp as "DD Mon YYYY" (e.g. "12 Sep 2025"). */
+/**
+ * Format a Unix-ish millisecond timestamp as "<day> <Month>, <HH:mm>"
+ * (e.g. "22 November, 14:30") in local time.
+ *
+ * Returns "--" for invalid timestamps. Never includes a year.
+ */
 export function formatDate(ts: number): string {
   if (!Number.isFinite(ts)) return '--'
-  return new Date(ts).toLocaleDateString('en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
+  const d = new Date(ts)
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return `${d.getDate()} ${d.toLocaleString('en-US', { month: 'long' })}, ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-/** Format a finish timestamp as "MMM D, YYYY, HH:mm" (e.g. "Sep 12, 2025, 15:30"). */
+/**
+ * Format a finish timestamp as "<day> <Month>, <HH:mm>"
+ * (e.g. "22 November, 14:30") in local time.
+ *
+ * Returns "--" for invalid timestamps. Never includes a year.
+ */
 export function formatFinishDate(ts: number): string {
-  if (!Number.isFinite(ts)) return '--'
-  return new Date(ts).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
+  return formatDate(ts)
 }

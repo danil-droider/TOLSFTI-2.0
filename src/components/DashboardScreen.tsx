@@ -38,6 +38,14 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
   // Ref tracking last-rendered ETA/percentage strings to trigger animation ONLY on change
   const prevPctRef = useRef<string>('')
   const prevEtaRef = useRef<string>('')
+  // Ref tracking last-rendered formatted saved-amount strings per goal, compared
+  // during render (not in useEffect) so live value changes trigger the fade.
+  const savedPrevRef = useRef<Map<string, string>>(new Map())
+  // Transition key per goal; incremented only when the formatted saved string
+  // actually changes. Used as a React `key` to remount the earned-amount span so
+  // the fade-down-in CSS animation replays on every real change, without
+  // strobing on every live 1-second tick when the formatted string is unchanged.
+  const savedKeyRef = useRef<Map<string, number>>(new Map())
 
   useEffect(() => {
     const state = useGoalStore.getState()
@@ -93,6 +101,20 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
             value: ICON_NAMES[index % ICON_NAMES.length],
           }
           const goalBadge: BadgeValue = goal.badge ?? fallbackBadge
+          const now = Date.now()
+          const rate = store.goalRate(goal.id)
+          let liveSaved = goal.saved
+          if (goal.status === "active" && goal.saved < goal.target) {
+            liveSaved = Math.min(goal.target, goal.saved + rate * (now - goal.lastUpdated))
+          }
+          const savedUsd = formatUsd(liveSaved)
+          const prevSaved = savedPrevRef.current.get(goal.id)
+          const savedChanged = prevSaved !== undefined && prevSaved !== savedUsd
+          if (savedChanged) {
+            savedKeyRef.current.set(goal.id, (savedKeyRef.current.get(goal.id) ?? 0) + 1)
+          }
+          savedPrevRef.current.set(goal.id, savedUsd)
+          const savedTransitionKey = savedKeyRef.current.get(goal.id) ?? 0
           return (
             <div
               key={goal.id}
@@ -106,7 +128,14 @@ export default function DashboardScreen({ onGoalSelect, onSetSalary, onCreateGoa
                   <div className="flex items-baseline justify-between gap-2">
                     <h3 className="font-semibold text-[#FFFFFF]">{goal.title}</h3>
                     <span className="text-muted text-sm tabular-nums">
-                      {formatUsd(goal.saved)} / {formatUsd(goal.target)}
+                      <span
+                        className={`tabular-nums ${savedChanged ? 'fade-down-in' : ''}`}
+                        key={`${savedUsd}-${savedTransitionKey}`}
+                      >
+                        {savedUsd}
+                      </span>
+                      {' / '}
+                      {formatUsd(goal.target)}
                     </span>
                   </div>
                 </div>

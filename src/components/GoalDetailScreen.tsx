@@ -1,7 +1,7 @@
+import { useRef, useEffect } from "react"
 import { ChevronLeft, Pause, Play } from "lucide-react"
 import { useGoalStore } from "../store/useGoalStore.ts"
 import { formatDate, formatFinishDate, formatUsd, formatPct } from "../utils/formatters.ts"
-
 import GoalBadge from "./GoalBadge.tsx"
 export type GoalStatus = "idle" | "active" | "paused" | "completed"
 
@@ -39,6 +39,26 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
   const isIdle = goal.status === "idle"
   const isCompleted = goal.status === "completed"
 
+  // Track last-rendered formatted saved amount and a transition key, compared
+  // during render (not in useEffect) so live value changes trigger the fade.
+  const savedPrevRef = useRef<string>('')
+  const savedKeyRef = useRef(0)
+
+  // Compute live accumulated saved amount in sync with percentage/ETA:
+  // liveSaved = stored saved + rate * elapsed time since last commit.
+  const now = Date.now()
+  const rate = store.goalRate(goal.id)
+  let liveSaved = goal.saved
+  if (goal.status === "active" && goal.saved < goal.target) {
+    liveSaved = Math.min(goal.target, goal.saved + rate * (now - goal.lastUpdated))
+  }
+  const savedUsd = formatUsd(liveSaved)
+  const savedChanged = savedPrevRef.current !== '' && savedPrevRef.current !== savedUsd
+  if (savedChanged) {
+    savedKeyRef.current += 1
+  }
+  savedPrevRef.current = savedUsd
+
   const badge = STATUS_BADGE[goal.status] ?? STATUS_BADGE.idle
   const { label: badgeLabel, bg: badgeBg, border: badgeBorder, text: badgeText } = badge
   const barColor = BAR_COLOR[goal.status] ?? BAR_COLOR.idle
@@ -50,8 +70,6 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
     : finishMs === null
     ? "Paused"
     : formatFinishDate(Date.now() + finishMs)
-  const pctColor = isActive || isCompleted ? "text-emerald" : isPaused ? "text-amber" : "text-muted"
-
   void tick
 
   const actionButton = isPaused ? (
@@ -133,14 +151,22 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
             <span className="text-sm font-semibold text-muted">Saved</span>
           </div>
           <div className="font-bold text-[24px] tabular-nums text-[#FFFFFF]">
-            {formatUsd(goal.saved)} / {formatUsd(goal.target)}
+            <span
+              className={`tabular-nums ${savedChanged ? 'fade-down-in' : ''}`}
+              key={`${savedUsd}-${savedKeyRef.current}`}
+            >
+              {savedUsd}
+            </span>
+            {' / '}
+            {formatUsd(goal.target)}
           </div>
+          <span className="font-bold text-[#FFFFFF] tabular-nums">{formatPct(pct)}</span>
           <div className="h-2 w-full rounded-full bg-[#3A3A3C] overflow-hidden">
             <div className={`h-2 ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
           </div>
           <div className="flex justify-between items-baseline gap-2">
             <span className="text-sm font-semibold text-muted">Progress</span>
-            <span className={`font-bold tabular-nums ${pctColor}`}>{formatPct(pct)}</span>
+            <span className="font-bold text-[#FFFFFF] tabular-nums">{formatPct(pct)}</span>
           </div>
           <div className="flex justify-between items-baseline gap-2">
             <span className="text-sm font-semibold text-muted">ETA</span>
@@ -157,10 +183,6 @@ export default function GoalDetailScreen({ goalId, onBack }: GoalDetailScreenPro
             <div className="flex justify-between items-baseline gap-2">
               <span className="text-sm text-muted">Expected Finish:</span>
               <span className="font-bold text-[#FFFFFF] tabular-nums">{finishLabel}</span>
-            </div>
-            <div className="flex justify-between items-baseline gap-2 border-t border-white/6 pt-3">
-              <span className="text-sm text-muted">Target:</span>
-              <span className="font-bold text-[#FFFFFF] tabular-nums">{formatUsd(goal.target)}</span>
             </div>
           </div>
         </section>

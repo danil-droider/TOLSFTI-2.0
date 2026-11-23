@@ -64,6 +64,16 @@ describe("render guard (corrupted status)", () => {
       renderToString(React.createElement(GoalDetailScreen, { goalId: "g1", onBack: () => {} }))
     ).not.toThrow()
   })
+
+  it("renders GoalDetailScreen without the Target row", () => {
+    setStore([baseGoal({ status: "active" })])
+    const html = renderToString(
+      React.createElement(GoalDetailScreen, { goalId: "g1", onBack: () => {} })
+    )
+    expect(html).not.toContain("Target:")
+    expect(html).toContain("Started:")
+    expect(html).toContain("Expected Finish:")
+  })
 })
 
 describe("render guard (goal badges)", () => {
